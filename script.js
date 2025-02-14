@@ -3,22 +3,34 @@ const resultArtist = document.getElementById("result-artist");
 const resultPlaylist = document.getElementById('result-playlists');
 
 function requestApi(searchTerm) {
-    const url = `http://localhost:3000/artists?name_like=${searchTerm}`;
+    const url = `http://localhost:3000/artists`;
     fetch(url)
         .then((response) => response.json())
-        .then((result) => displayResults(result, searchTerm))
+        .then((result) => displayResults(result, searchTerm));
 }
 
-function displayResults(result) {
+function displayResults(result, searchTerm) {
     resultPlaylist.classList.add('hidden');
-    resultArtist.innerHTML = ''; // Limpa os resultados antigos
+    resultArtist.innerHTML = ''; 
 
-    if (result.length === 0) {
-        resultArtist.classList.remove('active'); // Esconde se não houver resultados
+    if (!searchTerm.trim()) {
+        resultArtist.classList.remove('active'); 
         return;
     }
 
-    result.forEach(element => {
+    const lowerSearchTerm = searchTerm.toLowerCase();
+
+    const filteredResults = result.filter(element => {
+        const lowerName = element.name.toLowerCase();
+        return lowerName.startsWith(lowerSearchTerm[0]) && lowerName.includes(lowerSearchTerm);
+    });
+
+    if (filteredResults.length === 0) {
+        resultArtist.classList.remove('active'); 
+        return;
+    }
+
+    filteredResults.forEach(element => {
         const artistCard = document.createElement('div');
         artistCard.classList.add('artist-card');
 
@@ -39,15 +51,15 @@ function displayResults(result) {
         resultArtist.appendChild(artistCard);
     });
 
-    resultArtist.classList.add('active'); // Exibe os resultados apenas se houver artistas
+    resultArtist.classList.add('active'); 
 }
 
-document.addEventListener('input', function () {
-    const searchTerm = searchInput.value.toLowerCase();
+searchInput.addEventListener('input', function () {
+    const searchTerm = searchInput.value.toLowerCase().trim(); 
+
     if (searchTerm === '') {
-        resultPlaylist.classList.add('hidden');
-        resultArtist.classList.remove('hidden');
-        resultArtist.innerHTML = ''; // Limpa os resultados ao apagar a pesquisa
+        resultArtist.classList.remove('active');
+        resultArtist.innerHTML = ''; 
         return;
     }
 
